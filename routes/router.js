@@ -1,5 +1,7 @@
-const router = require('express').Router();
+const express = require('express');
 const database = include('databaseConnection');
+const { MongoClient } = require('mongodb');
+const router = express.Router();
 //const dbModel = include('databaseAccessLayer');
 //const dbModel = include('staticData');
 
@@ -14,24 +16,21 @@ const passwordPepper = "SeCretPeppa4MySal+";
 router.get('/', async (req, res) => {
 	console.log("page hit");
 	try {
-		// const users = await userModel.findAll({attributes: ['web_user_id','first_name','last_name','email']}); //{where: {web_user_id: 1}}
-		const userCollection = database.db('lab_example').collection('users');
-		const users = await userCollection.find().project({first_name: 1, last_name: 1, email: 1, _id: 1}).toArray(); 
-		if (users === null) {
-			res.render('error', {message: 'Error connecting to MySQL'});
-			console.log("Error connecting to userModel");
-		}
-		else {
-			console.log(users);
-			res.render('index', {allUsers: users});
-		}
+	  const client = await MongoClient.connect(process.env.MONGO_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true
+	  });
+	  const db = client.db('lab_example');
+	  const userCollection = db.collection('users');
+	  const users = await userCollection.find().project({first_name: 1, last_name: 1, email: 1, _id: 1}).toArray(); 
+	  console.log(users);
+	  res.render('index', {allUsers: users});
+	  client.close(); // Close the MongoDB connection when done
+	} catch (error) {
+	  console.error("Error connecting to MongoDB:", error);
+	  res.render('error', {message: 'Error connecting to MongoDB'});
 	}
-	catch(ex) {
-		res.render('error', {message: 'Error connecting to MySQL'});
-		console.log("Error connecting to MySQL");
-		console.log(ex);
-	}
-});
+  });
 
 router.get('/pets', async (req, res) => {
 	console.log("page hit");
@@ -90,9 +89,6 @@ router.get('/deleteUser', async (req, res) => {
 			let deleteUser = await userModel.findByPk(userId);
 			console.log("deleteUser: ");
 			console.log(deleteUser);
-			if (deleteUser !== null) {
-				await deleteUser.destroy();
-			}
 		}
 		res.redirect("/");
 	}
@@ -125,7 +121,6 @@ router.post('/addUser', async (req, res) => {
 				password_hash: password_hash.digest('hex')
 			}
 		);
-		await newUser.save();
 		res.redirect("/");
 	}
 	catch(ex) {

@@ -2,6 +2,14 @@ const database = include('/databaseConnection');
 
 const passwordPepper = "SeCretPeppa4MySal+";
 
+const Joi = require("joi"); 
+const schema = Joi.string().max(10).required(); 
+const validationResult = schema.validate(req.query.id); 
+if (validationResult.error != null) { 
+	console.log(validationResult.error); 
+	throw validationResult.error; 
+} 
+
 function getAllUsers(callback) {
 	let sqlQuery = "SELECT web_user_id, first_name, last_name, email FROM web_user";
 	database.query(sqlQuery, (err, results, fields) => {
