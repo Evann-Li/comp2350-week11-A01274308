@@ -1,0 +1,1 @@
+{  "first_name" : "Awesome", "last_name" : "Possum!", "email" : "possum.buddies@example.com", "password_salt" : "thisismyhash", "password_hash" : "hashedpassword" }

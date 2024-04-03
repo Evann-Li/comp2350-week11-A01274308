@@ -1,31 +1,17 @@
-const mysql = require('mysql2');
+const MongoClient = require("mongodb").MongoClient;
 
-const is_heroku = process.env.IS_HEROKU || false;
+const is_render = process.env.IS_RENDER || false; 
 
-const dbConfigHeroku = {
-	host: "us-cdbr-east-03.cleardb.com",
-	user: "b1ab7fb2ee03bc",
-	password: "2a484a2d",
-	database: "heroku_3d208ad4bd6f421",
-	multipleStatements: false,
-	namedPlaceholders: true
-};
+const renderURI = "mongodb+srv://theMongoAdmin:accidentalLoginSteps@cluster0.hwmliaf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" 
 
-const dbConfigLocal = {
-	host: "localhost",
-	user: "root",
-	password: "Password",
-	database: "lab_example",
-	multipleStatements: false,
-	namedPlaceholders: true
-};
+const localURI = "mongodb://127.0.0.1/?authSource=admin&retryWrites=true&w=majority"
 
-if (is_heroku) {
-	var database = mysql.createPool(dbConfigHeroku);
-}
-else {
-	var database = mysql.createPool(dbConfigLocal);
+if (is_render) { 
+	var database = new MongoClient(renderURI,  
+		{useNewUrlParser: true, useUnifiedTopology: true}); 
+} else { 
+	var database = new MongoClient(localURI,  
+		{useNewUrlParser: true, useUnifiedTopology: true}); 	
 }
 
 module.exports = database;
-		
